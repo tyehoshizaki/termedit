@@ -1,6 +1,8 @@
 #include "termedit/Terminal.hpp"
 
+#include <asm-generic/ioctls.h>
 #include <iostream>
+#include <unistd.h>
 
 namespace termedit {
 
@@ -29,8 +31,11 @@ char Terminal::readKey() const {
 }
 
 std::pair<int, int> Terminal::getWindowsSize() const {
-  // TODO: replace this placeholder wiht a real terminal-size query
-  return {24, 80};
+  struct winsize w;
+
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+  return {w.ws_col, w.ws_row};
 }
 
 void Terminal::write(const std::string &text) const {

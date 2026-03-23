@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <utility>
 
 namespace termedit {
