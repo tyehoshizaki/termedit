@@ -12,6 +12,7 @@ add_library(termed_core
     src/TextBuffer.cpp
     src/Editor.cpp
     src/Renderer.cpp
+    src/Terminal.cpp
 )
 
 target_include_directories(termed_core
