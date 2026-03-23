@@ -1,5 +1,10 @@
 #include "termedit/Editor.hpp"
 
+namespace {
+
+constexpr char ctrlKey(char ch) { return ch & 0x1f; }
+} // namespace
+
 namespace termedit {
 
 Editor::Editor() = default;
@@ -16,7 +21,7 @@ void Editor::run() {
 }
 
 void Editor::refreshScreen() {
-  const auto [rows, cols] = terminal_.getWindowsSize();
+  const auto [rows, cols] = terminal_.getWindowSize();
 
   RenderContext context;
   context.screenRows = rows;
@@ -31,9 +36,13 @@ void Editor::refreshScreen() {
 void Editor::processKeyPress() {
   const char key = terminal_.readKey();
 
-  // Ctrl-Q
-  if (key == 17) {
+  switch (key) {
+  case ctrlKey('q'):
     running_ = false;
+    break;
+
+  default:
+    break;
   }
 }
 
