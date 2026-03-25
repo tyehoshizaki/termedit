@@ -1,5 +1,7 @@
 #pragma once
 
+#include "termedit/key.hpp"
+
 #include <string>
 #include <termios.h>
 #include <utility>
@@ -17,7 +19,7 @@ public:
   void enableRawMode();
   void disableRawMode();
 
-  [[nodiscard]] char readKey() const;
+  [[nodiscard]] KeyPress readKey() const;
   [[nodiscard]] std::pair<int, int> getWindowSize() const;
 
   void write(const std::string &text) const;

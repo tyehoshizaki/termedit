@@ -1,10 +1,39 @@
 #include "termedit/Terminal.hpp"
+#include "termedit/key.hpp"
 
+#include <cctype>
 #include <iostream>
 #include <stdexcept>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 #include <termios.h>
 #include <unistd.h>
+
+namespace {
+constexpr char kEscape = '\x1b';
+constexpr char kEnterCarriageReturn = '\r';
+constexpr char kEnterLineFeed = '\n';
+constexpr char kBackspace = 127;
+
+constexpr char kCsiIntroducer = '[';
+constexpr char kArrowUpCode = 'A';
+constexpr char kArrowDownCode = 'B';
+constexpr char kArrowRightCode = 'C';
+constexpr char kArrowLeftCode = 'D';
+
+constexpr char kFirstCtrlCode = 1;
+constexpr char kLastCtrlCode = 26;
+
+constexpr char kReadByteCount = 1;
+
+[[nodiscard]] bool isCtrlCode(char ch) {
+  return ch >= kFirstCtrlCode && ch <= kLastCtrlCode;
+}
+
+[[nodiscard]] char ctrlCodeToLetter(char ch) {
+  return static_cast<char>('a' + (ch - kFirstCtrlCode));
+}
+} // namespace
 
 namespace termedit {
 
@@ -54,15 +83,62 @@ void Terminal::disableRawMode() {
   rawModeEnabled_ = false;
 }
 
-char Terminal::readKey() const {
+KeyPress Terminal::readKey() const {
   char ch = '\0';
-  while (true) {
-    const ssize_t bytesRead = ::read(STDIN_FILENO, &ch, 1);
 
-    if (bytesRead == 1) {
-      return ch;
+  while (true) {
+    const ssize_t bytesRead = ::read(STDIN_FILENO, &ch, kReadByteCount);
+
+    if (bytesRead == kReadByteCount) {
+      break;
     }
   }
+
+  if (ch == kEscape) {
+    char seq[2]{};
+
+    const ssize_t firstRead = ::read(STDIN_FILENO, &seq[0], kReadByteCount);
+    const ssize_t secondRead = ::read(STDIN_FILENO, &seq[1], kReadByteCount);
+
+    if (firstRead != kReadByteCount || secondRead != kReadByteCount) {
+      return {KeyType::Escape, '\0'};
+    }
+
+    if (seq[0] == kCsiIntroducer) {
+      switch (seq[1]) {
+      case kArrowUpCode:
+        return {KeyType::ArrowUp, '\0'};
+      case kArrowDownCode:
+        return {KeyType::ArrowDown, '\0'};
+      case kArrowRightCode:
+        return {KeyType::ArrowRight, '\0'};
+      case kArrowLeftCode:
+        return {KeyType::ArrowLeft, '\0'};
+      default:
+        return {KeyType::Unknown, '\0'};
+      }
+    }
+
+    return {KeyType::Escape, '\0'};
+  }
+
+  if (ch == kEnterCarriageReturn || ch == kEnterLineFeed) {
+    return {KeyType::Enter, '\0'};
+  }
+
+  if (ch == kBackspace) {
+    return {KeyType::Backspace, '\0'};
+  }
+
+  if (isCtrlCode(ch)) {
+    return {KeyType::Ctrl, ctrlCodeToLetter(ch)};
+  }
+
+  if (std::isprint(static_cast<unsigned char>(ch))) {
+    return {KeyType::Character, ch};
+  }
+
+  return {KeyType::Unknown, '\0'};
 }
 
 std::pair<int, int> Terminal::getWindowSize() const {
