@@ -1,6 +1,7 @@
 #include "termedit/Renderer.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <sstream>
 #include <string>
 
@@ -9,14 +10,24 @@ namespace termedit {
 std::string Renderer::buildFrame(const RenderContext &context) const {
   std::ostringstream out;
 
-  out << "\x1b[?251";
+  out << "\x1b[?25l";
 
   out << "\x1b[H";
 
   const int contentRows = std::max(0, context.screenRows - 1);
 
   for (int row = 0; row < contentRows; ++row) {
-    out << "~";
+    if (row < static_cast<int>(context.visableLines.size())) {
+      std::string line = context.visableLines[static_cast<std::size_t>(row)];
+
+      if (static_cast<int>(line.size()) > context.screenCols) {
+        line.resize(static_cast<std::size_t>(context.screenCols));
+      }
+
+      out << line;
+    } else {
+      out << "~";
+    }
 
     out << "\x1b[K";
 

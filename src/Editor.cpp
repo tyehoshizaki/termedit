@@ -1,5 +1,6 @@
 #include "termedit/Editor.hpp"
 #include "termedit/key.hpp"
+#include <cstddef>
 
 namespace termedit {
 
@@ -31,6 +32,16 @@ void Editor::refreshScreen() {
   context.cursorX = cursorX_;
   context.cursorY = cursorY_;
   context.statusText = "TermEdit - Ctrl-Q to quit";
+
+  const int contentRows = std::max(0, rows - 1);
+  const std::size_t linesToRender =
+      std::min(buffer_.lineCount(), static_cast<std::size_t>(contentRows));
+
+  context.visableLines.reserve(linesToRender);
+
+  for (std::size_t row = 0; row < linesToRender; ++row) {
+    context.visableLines.push_back(buffer_.getLine(row));
+  }
 
   terminal_.write(renderer_.buildFrame(context));
 }

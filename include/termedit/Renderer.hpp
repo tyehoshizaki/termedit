@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace termedit {
 
@@ -9,6 +10,7 @@ struct RenderContext {
   int screenCols = 0;
   int cursorX = 0;
   int cursorY = 0;
+  std::vector<std::string> visableLines;
   std::string statusText;
 };
 
