@@ -1,6 +1,5 @@
 #include "termedit/Editor.hpp"
 #include "termedit/key.hpp"
-#include <sys/types.h>
 
 namespace termedit {
 
@@ -96,7 +95,7 @@ void Editor::moveCursorLeft(int windowSizeX) {
     if (cursorY_ == 0) {
       return;
     } else {
-      cursorX_ = windowSizeX;
+      cursorX_ = windowSizeX - 1;
       moveCursorUp();
     }
   }
