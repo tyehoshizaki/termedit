@@ -41,9 +41,16 @@ void Editor::processKeyPress() {
 
   switch (key.type) {
   case KeyType::Ctrl:
-    if (key.character == 'q') {
-      quit();
-    }
+    handleCtrlKey(key.character);
+    break;
+  case KeyType::Character:
+    insertCharacter(key.character);
+    break;
+  case KeyType::Enter:
+    insertNewLine();
+    break;
+  case KeyType::Backspace:
+    backspace();
     break;
 
   case KeyType::ArrowLeft:
@@ -61,6 +68,30 @@ void Editor::processKeyPress() {
 
   default:
     break;
+  }
+}
+
+void Editor::handleCtrlKey(char ch) {
+  if (ch == 'q') {
+    quit();
+  }
+}
+
+void Editor::insertCharacter(char ch) {
+  buffer_.insertChar(cursorY_, cursorX_, ch);
+  ++cursorX_;
+}
+
+void Editor::insertNewLine() {
+  buffer_.insertNewline(cursorY_, cursorX_);
+  ++cursorY_;
+  cursorX_ = 0;
+}
+
+void Editor::backspace() {
+  if (cursorX_ > 0) {
+    buffer_.eraseChar(cursorY_, cursorX_ - 1);
+    --cursorX_;
   }
 }
 
