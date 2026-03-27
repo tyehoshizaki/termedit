@@ -16,6 +16,7 @@ public:
   void insertChar(std::size_t row, std::size_t col, char ch);
   void eraseChar(std::size_t row, std::size_t col);
   void insertNewline(std::size_t row, std::size_t col);
+  void deleteLine(std::size_t row);
 
 private:
   std::vector<std::string> lines_;

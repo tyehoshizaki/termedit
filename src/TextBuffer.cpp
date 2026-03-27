@@ -64,4 +64,19 @@ void TextBuffer::insertNewline(std::size_t row, std::size_t col) {
       rightside);
 }
 
+void TextBuffer::deleteLine(std::size_t row) {
+  if (row >= lines_.size()) {
+    throw std::out_of_range("TextBuffer::deleteLine row out of range");
+  }
+
+  if (row == 0) {
+    return;
+  }
+
+  std::string line = lines_[row];
+
+  lines_[row - 1].append(line);
+  lines_.erase(lines_.begin() + row);
+}
+
 } // namespace termedit

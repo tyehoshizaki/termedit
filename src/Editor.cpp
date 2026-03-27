@@ -103,6 +103,9 @@ void Editor::backspace() {
   if (cursorX_ > 0) {
     buffer_.eraseChar(cursorY_, cursorX_ - 1);
     --cursorX_;
+  } else if (cursorX_ == 0) {
+    buffer_.deleteLine(cursorY_);
+    --cursorY_;
   }
 }
 
